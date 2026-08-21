@@ -1,0 +1,431 @@
+{
+ "docs": [
+  {
+   "context": "L",
+   "pnx": {
+    "control": {
+     "recordid": [
+      "alma991008037359709436"
+     ]
+    },
+    "display": {
+     "type": [
+      "book"
+     ],
+     "language": [
+      "eng"
+     ],
+     "title": [
+      "Artificial intelligence "
+     ],
+     "format": [
+      "xxv, 737 p. : ill. ; 25 cm."
+     ],
+     "identifier": [
+      "$$CLC$$V91041385;$$CISBN$$V0201533774;$$COCLC$$V(OCoLC)ocm24870723"
+     ],
+     "creationdate": [
+      "c1992"
+     ],
+     "creator": [
+      "Winston, Patrick Henry.$$QWinston, Patrick Henry."
+     ],
+     "publisher": [
+      "Reading MA : Addison-Wesley"
+     ],
+     "mms": [
+      "991008037359709436"
+     ],
+     "edition": [
+      "3rd ed."
+     ],
+     "place": [
+      "Reading MA :"
+     ],
+     "subject": [
+      "Artificial intelligence"
+     ]
+    },
+    "addata": {
+     "isbn": [
+      "0201533774"
+     ]
+    }
+   },
+   "delivery": {
+    "bestlocation": {
+     "libraryCode": "JFT_LIB",
+     "availabilityStatus": "available",
+     "subLocation": "Jafet:J",
+     "mainLocation": "Jafet Library",
+     "callNumber": "J 001.535:W783a3:c.1"
+    }
+   }
+  },
+  {
+   "context": "L",
+   "pnx": {
+    "control": {
+     "recordid": [
+      "alma991007133899709436"
+     ]
+    },
+    "display": {
+     "type": [
+      "book"
+     ],
+     "language": [
+      "eng"
+     ],
+     "title": [
+      "A world history "
+     ],
+     "format": [
+      "xvii, 558 pages, 64 pages of plates, 23 unnumbered pages of plates : illustrations, maps (some color) ; 24 cm"
+     ],
+     "identifier": [
+      "$$CISBN$$V0192158600;$$CISBN$$V9780192158604"
+     ],
+     "creationdate": [
+      "1979"
+     ],
+     "creator": [
+      "McNeill, William Hardy, 1917-2016. author.$$QMcNeill, William Hardy"
+     ],
+     "publisher": [
+      "New York : Oxford University Press"
+     ],
+     "description": [
+      "Global in scope, William McNeill's widely acclaimed one-volume history emphasizes the four Old World civilizations of the Middle East, India, China, and Europe, paying particular attention to their interaction across time as well as the impact on historical scholarship in light of the most recent archaeological discoveries.",
+      "William Hardy McNeill was born in Vancouver, British Columbia, Canada on October 31, 1917."
+     ],
+     "mms": [
+      "991007133899709436"
+     ],
+     "edition": [
+      "New edition."
+     ],
+     "place": [
+      "New York :"
+     ],
+     "subject": [
+      "World history"
+     ]
+    },
+    "addata": {
+     "isbn": [
+      "0192158600",
+      "9780192158604"
+     ]
+    }
+   },
+   "delivery": {
+    "bestlocation": {
+     "libraryCode": "JFT_LIB",
+     "availabilityStatus": "available",
+     "subLocation": "Jafet:J",
+     "mainLocation": "Jafet Library",
+     "callNumber": "J 909:M169w"
+    }
+   }
+  },
+  {
+   "context": "PC",
+   "pnx": {
+    "control": {
+     "recordid": [
+      "cdi_askewsholts_vlebooks_9781040862896"
+     ]
+    },
+    "display": {
+     "description": [
+      "World history continues to evolve as one of the most popular and widely discussed approaches to the study of history."
+     ],
+     "format": [
+      "226"
+     ],
+     "language": [
+      "eng"
+     ],
+     "creationdate": [
+      "2026"
+     ],
+     "type": [
+      "book"
+     ],
+     "title": [
+      "World History: The Basics"
+     ],
+     "creator": [
+      "Stearns, Peter N."
+     ],
+     "edition": [
+      "Second edition"
+     ],
+     "publisher": [
+      "Oxford: Routledge"
+     ],
+     "identifier": [
+      "ISBN: 1041228376",
+      "ISBN: 9781041241171",
+      "ISBN: 9781041228370",
+      "ISBN: 1041241178",
+      "EISBN: 9781003740209",
+      "EISBN: 1040862845",
+      "EISBN: 1003740200",
+      "EISBN: 1040862896",
+      "EISBN: 9781040862841",
+      "EISBN: 9781040862896",
+      "DOI: 10.4324/9781003740209",
+      "OCLC: 1583182653"
+     ],
+     "subject": [
+      "World history"
+     ]
+    },
+    "addata": {
+     "isbn": [
+      "1041228376",
+      "9781041241171",
+      "9781041228370",
+      "1041241178"
+     ]
+    }
+   },
+   "delivery": {
+    "bestlocation": null
+   }
+  },
+  {
+   "context": "L",
+   "pnx": {
+    "control": {
+     "recordid": [
+      "alma991000001399709436"
+     ]
+    },
+    "display": {
+     "type": [
+      "journal"
+     ],
+     "language": [
+      "eng"
+     ],
+     "title": [
+      "Medicine."
+     ],
+     "format": [
+      "volumes : illustrations ; 26 cm"
+     ],
+     "identifier": [
+      "$$CISSN$$V0025-7974;$$COCLC$$V(OCoLC)ocn1716220"
+     ],
+     "creationdate": [
+      "1922-"
+     ],
+     "publisher": [
+      "Baltimore : Williams & Wilkins Co.",
+      "v.1 (May 1922)"
+     ],
+     "mms": [
+      "991000001399709436"
+     ],
+     "place": [
+      "Baltimore :"
+     ],
+     "subject": [
+      "Medicine -- Periodicals$$QMedicine -- Periodicals -- Periodicals"
+     ]
+    },
+    "addata": {}
+   },
+   "delivery": {
+    "bestlocation": {
+     "libraryCode": "SML_LIB",
+     "availabilityStatus": "available",
+     "subLocation": "SML Stacks",
+     "mainLocation": "Saab Medical Library",
+     "callNumber": ""
+    }
+   }
+  },
+  {
+   "context": "L",
+   "pnx": {
+    "control": {
+     "recordid": [
+      "alma991010725379709436"
+     ]
+    },
+    "display": {
+     "type": [
+      "book"
+     ],
+     "language": [
+      "eng"
+     ],
+     "title": [
+      "Artificial intelligence "
+     ],
+     "format": [
+      "1 online resource (xxiv, 275 pages) : illustrations."
+     ],
+     "identifier": [
+      "$$CISBN$$V9781483154367;$$CISBN$$V148315436X;$$COCLC$$V(OCoLC)893872978;$$CISBN$$V0080341128"
+     ],
+     "creationdate": [
+      "©1987"
+     ],
+     "publisher": [
+      "Oxford Oxfordshire ; New York : Pergamon Infotech"
+     ],
+     "description": [
+      "Artificial Intelligence: State of the Art Report is a two-part report consisting of the invited papers and the analysis."
+     ],
+     "mms": [
+      "991010725379709436"
+     ],
+     "place": [
+      "Oxford Oxfordshire] ; New York :"
+     ],
+     "subject": [
+      "Artificial intelligence",
+      "Intelligence artificielle"
+     ]
+    },
+    "addata": {
+     "isbn": [
+      "9781483154367",
+      "148315436X",
+      "0080341128"
+     ]
+    }
+   },
+   "delivery": {
+    "bestlocation": null
+   }
+  },
+  {
+   "context": "L",
+   "pnx": {
+    "control": {
+     "recordid": [
+      "alma991010424909709436"
+     ]
+    },
+    "display": {
+     "type": [
+      "book"
+     ],
+     "language": [
+      "eng"
+     ],
+     "format": [
+      "1 online resource (xii, 468 pages) illustrations."
+     ],
+     "identifier": [
+      "$$CISBN$$V9780123623409;$$CISBN$$V0123623405;$$CISBN$$V9781483263175;$$CISBN$$V1483263177;$$COCLC$$V(OCoLC)593543580"
+     ],
+     "creationdate": [
+      "1975"
+     ],
+     "creator": [
+      "Hunt, Earl B.$$QHunt, Earl B."
+     ],
+     "publisher": [
+      "New York, Academic Press"
+     ],
+     "description": [
+      "Artificial Intelligence provides information pertinent to the fundamental aspects of artificial intelligence."
+     ],
+     "mms": [
+      "991010424909709436"
+     ],
+     "place": [
+      "New York,"
+     ],
+     "subject": [
+      "Artificial intelligence",
+      "Intelligence artificielle"
+     ]
+    },
+    "addata": {
+     "isbn": [
+      "9780123623409",
+      "0123623405",
+      "9781483263175",
+      "1483263177"
+     ]
+    }
+   },
+   "delivery": {
+    "bestlocation": {
+     "libraryCode": "JFT_LIB",
+     "availabilityStatus": "available",
+     "subLocation": "Jafet:J",
+     "mainLocation": "Jafet Library",
+     "callNumber": "J 001.535:W783a3:c.1"
+    }
+   }
+  },
+  {
+   "context": "L",
+   "pnx": {
+    "control": {},
+    "display": {
+     "type": [
+      "book"
+     ],
+     "language": [
+      "eng"
+     ],
+     "title": [
+      "Artificial intelligence"
+     ],
+     "format": [
+      "1 online resource (xviii, 376 p.) : ill."
+     ],
+     "identifier": [
+      "$$CISBN$$V9780080527598 ;$$CISBN$$V0080527590 ;$$COCLC$$V(OCoLC)162571308;$$CISBN$$V0121619648;$$CISBN$$V9780121619640"
+     ],
+     "creationdate": [
+      "c1996"
+     ],
+     "publisher": [
+      "San Diego : Academic Press"
+     ],
+     "description": [
+      "Artificial Intelligence is the study of how to build or program computers to enable them to do what minds can do."
+     ],
+     "place": [
+      "San Diego :"
+     ],
+     "subject": [
+      "Intelligence artificielle",
+      "Kunstmatige intelligentie",
+      "COMPUTERS -- Enterprise Applications -- Business Intelligence Tools",
+      "COMPUTERS -- Intelligence (AI) & Semantics",
+      "Artificial intelligence"
+     ]
+    },
+    "addata": {
+     "isbn": [
+      "9780080527598",
+      "0080527590",
+      "0121619648",
+      "9780121619640"
+     ]
+    }
+   },
+   "delivery": {
+    "bestlocation": {
+     "libraryCode": "JFT_LIB",
+     "availabilityStatus": "available",
+     "subLocation": "Jafet:J",
+     "mainLocation": "Jafet Library",
+     "callNumber": "J 001.535:W783a3:c.1"
+    }
+   }
+  }
+ ]
+}

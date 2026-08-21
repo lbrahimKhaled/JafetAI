@@ -1,0 +1,20 @@
+services:
+  books-db:
+    image: pgvector/pgvector:pg16
+    container_name: jafet-books-db
+    environment:
+      POSTGRES_USER: jafet
+      POSTGRES_PASSWORD: jafet
+      POSTGRES_DB: jafet_books
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - jafet_books_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jafet -d jafet_books"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  jafet_books_data:

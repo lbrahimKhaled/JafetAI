@@ -1,0 +1,7 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+jafet.db
+.ipynb_checkpoints/
+.pytest_cache/

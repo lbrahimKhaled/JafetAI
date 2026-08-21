@@ -1,0 +1,13 @@
+google-adk>=2.7
+litellm>=1.84
+mcp>=2.0
+fastapi
+uvicorn[standard]
+requests
+python-dotenv
+psycopg[binary]
+openai
+pytest
+ipykernel
+nbclient
+nbformat
