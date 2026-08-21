@@ -1,20 +1,95 @@
+# JafetAI: pgvector + the chat server, both containers.
+# Config comes from the .env file next to this file (see README for the keys).
+#
+#   docker network create classmate-net   # once, ever -- shared with the ClassMate stack
+#   docker compose up -d --build          # postgres (seeded) + chat server on :8802
+#   docker compose run --rm ingest        # re-scrape the catalog into the DB (optional)
+#
+# The DB comes up already holding the 150 catalog books: seed/books.sql.gz is loaded by
+# postgres' own initdb hook the first time the volume is created, so a clean checkout is a
+# working bot without paying for a scrape-describe-embed pass. `ingest` is in the "tools"
+# profile precisely so it does NOT run on `up` -- it is how you refresh that seed, not how
+# you get one.
+
+name: jafet
+
 services:
   books-db:
     image: pgvector/pgvector:pg16
     container_name: jafet-books-db
+    restart: unless-stopped
     environment:
       POSTGRES_USER: jafet
       POSTGRES_PASSWORD: jafet
       POSTGRES_DB: jafet_books
-    ports:
-      - "127.0.0.1:5433:5432"
     volumes:
       - jafet_books_data:/var/lib/postgresql/data
+      # Both of these run only on an empty data directory. schema.sql is mounted from the
+      # package rather than copied here so there is one definition of the table -- the
+      # runtime `create table if not exists` in bookdb.conn() reads the same file.
+      - ./jafet/books/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./seed/books.sql.gz:/docker-entrypoint-initdb.d/02-books.sql.gz:ro
+    # published for psql and the notebooks; the app reaches it over the compose network
+    ports:
+      - "127.0.0.1:5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U jafet -d jafet_books"]
       interval: 5s
       timeout: 3s
       retries: 10
 
+  jafet:
+    build: .
+    image: jafet:latest
+    container_name: jafet
+    restart: unless-stopped
+    depends_on:
+      books-db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      JAFET_PG_DSN: postgresql://jafet:jafet@books-db:5432/jafet_books
+    volumes:
+      # seat cache + booking history; on a volume so a rebuild does not drop what was booked
+      - jafet_state:/data
+    # Loopback only. This endpoint reaches the booking tools and has no auth of its own, so
+    # the host publish is for curl and the evals -- ClassMate does not use it, it talks to
+    # this container by name over classmate-net below.
+    ports:
+      - "127.0.0.1:8802:8802"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8802/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - default
+      - classmate-net
+
+  # One-shot: re-scrape the AUB catalog, describe, embed, load. Costs NVIDIA + OpenAI
+  # calls and takes a while, which is why the seed exists and this is opt-in.
+  ingest:
+    build: .
+    image: jafet:latest
+    profiles: ["tools"]
+    depends_on:
+      books-db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      JAFET_PG_DSN: postgresql://jafet:jafet@books-db:5432/jafet_books
+    command: ["python", "-m", "jafet.books.ingest"]
+
 volumes:
   jafet_books_data:
+  jafet_state:
+
+networks:
+  # Created once by hand (`docker network create classmate-net`) rather than by either
+  # compose file, so neither stack has to be up before the other and Jafet still starts on
+  # its own. ClassMate's chatbot joins the same network and reaches http://jafet:8802.
+  classmate-net:
+    external: true

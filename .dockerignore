@@ -1,0 +1,15 @@
+.venv/
+.git/
+.github/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+evals/
+tests/
+seed/
+jafet.db
+jafet/.adk/
+.env
+*.docx
+.DS_Store

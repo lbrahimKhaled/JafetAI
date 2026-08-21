@@ -18,17 +18,52 @@ user / other chatbot ── HTTP (http_server.py or adk api_server) or MCP (mcp_
 
 offline: jafet/books/ingest.py ── Primo REST API -> descriptions -> embeddings -> Postgres
          (150 held books across 10 broad subjects, text-embedding-3-large, 3072d)
+         its output is checked in as seed/books.sql.gz, which is what a fresh
+         `docker compose up` loads, so ingest is a refresh and not a setup step
 ```
+
+Two containers: `jafet` (the chat server) and `books-db` (pgvector, seeded on first start).
+ClassMate's chatbot is a third, in its own stack, reaching `jafet` over a shared network —
+see [ClassMate](#classmate).
 
 Guardrails: prompt-injection blocklist before the model, deterministic booking-arg and SELECT-only SQL validation before tools, secret redaction + payload caps after the book tools. When the caller signed the student in, `book_seat` is also pinned to that email from session state, so one valid AUB address cannot stand in for another.
 
-## Setup
+## Run
+
+Both containers, and the database comes up already holding the books:
 
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-docker compose up -d                    # pgvector on 127.0.0.1:5433
-.venv/bin/python -m jafet.books.ingest  # scrape catalog, describe, embed, load
+docker network create classmate-net   # once, ever -- shared with the ClassMate stack
+docker compose up -d --build
+curl http://127.0.0.1:8802/health
+```
+
+That is the whole setup. `seed/books.sql.gz` is a dump of the 150 catalog books and their
+embeddings, mounted into Postgres' `docker-entrypoint-initdb.d`, so the first time the
+volume is created the table is loaded from it — no scrape, no embedding spend, no ingest
+step to remember. It only runs on an *empty* volume: `docker compose down -v` is what
+re-seeds, and a plain `down`/`up` keeps whatever is in there.
+
+You need a `.env` next to the compose file first; the keys are below.
+
+To refresh the catalog for real (scrape → describe → embed → load, costs NVIDIA and OpenAI
+calls) and then re-cut the seed:
+
+```bash
+docker compose run --rm ingest
+docker exec jafet-books-db pg_dump -U jafet -d jafet_books --data-only --table=books \
+  | grep -v '^\\restrict' | grep -v '^\\unrestrict' | gzip -9 > seed/books.sql.gz
+```
+
+### Other entrypoints
+
+The container runs `http_server.py`. The rest are host-side, against the same DB
+(`.venv/bin/pip install -r requirements.txt` first):
+
+```bash
+adk api_server --port 8801 .   # full ADK REST on http://localhost:8801
+adk web                        # dev UI in the browser
+python mcp_server.py           # MCP stdio server -- stdio, so it is not a compose service
 ```
 
 `.env` keys used:
@@ -37,18 +72,8 @@ docker compose up -d                    # pgvector on 127.0.0.1:5433
 - `MODEL` — optional LiteLLM override, e.g. `openrouter/<model>` or `nvidia_nim/<model>`
 - `OPEN_AI_KEY` — OpenAI embeddings (`text-embedding-3-large`), used by ingest and per search query
 - `NVIDIA_API_KEY` — description generation during ingest (NVIDIA NIM)
-- `JAFET_PG_DSN` — optional Postgres override (default `postgresql://jafet:jafet@127.0.0.1:5433/jafet_books`)
+- `JAFET_PG_DSN` — Postgres override. Compose sets it to `books-db:5432`; host-side runs get the default `postgresql://jafet:jafet@127.0.0.1:5433/jafet_books`, which is the same database through the published port
 - `LIVE_BOOKING=1` — actually submit reservations to LibCal (off by default: bookings are validated, stored as `dry_run`, never sent)
-
-## Run
-
-```bash
-source .venv/bin/activate
-python http_server.py     # chat endpoint on http://127.0.0.1:8802
-adk api_server --port 8801 .   # or: full ADK REST on http://localhost:8801
-adk web                   # or: dev UI in the browser
-python mcp_server.py      # or: MCP stdio server
-```
 
 ## HTTP API (for another chatbot)
 
@@ -78,19 +103,39 @@ student. Only the session-state half is trusted, because a student can type the 
 themselves. An address that is not `@mail.aub.edu` is dropped rather than passed on: stating
 one would tell the model to stop asking for an email that the booking guardrail then rejects.
 
-`JAFET_HTTP_HOST` / `JAFET_HTTP_PORT` move it; it binds to loopback by default because
-this endpoint reaches the booking tools. There is no auth on it — put it behind one, or
-leave it on loopback, before `LIVE_BOOKING=1`. A caller in a container is the case that
-forces the decision: `host.docker.internal` reaches a loopback bind on Docker Desktop but
-not on a Linux host, where the only ways out are binding wider (and then adding auth) or
-running Jafet inside the caller's compose network.
+`JAFET_HTTP_HOST` / `JAFET_HTTP_PORT` move it. There is no auth on it and it reaches the
+booking tools, so where it is reachable from is the decision to get right before
+`LIVE_BOOKING=1`. In the container it binds `0.0.0.0`, which is not the same statement:
+what can actually reach it is the compose network plus the published port, and the compose
+file publishes to `127.0.0.1:8802` only. Container callers get to it by name over a private
+network instead — which is the point of the setup below, and why nothing here has to be
+bound wider.
 
 ### ClassMate
 
 ClassMate's chatbot calls this endpoint from its `ask_library` tool, keyed on the ClassMate
 thread id, so a student books a seat without leaving that chat. Its side is
-`chatbot/classmate_rag/agents/library.py` and it reads `JAFET_URL` (default
-`http://localhost:8802`).
+`chatbot/classmate_rag/agents/library.py`, reading `JAFET_URL`.
+
+The two stacks are separate compose projects joined by one external network, so either can
+be brought up or torn down without the other:
+
+```bash
+docker network create classmate-net            # once, ever
+
+cd ~/Documents/JafetAI  && docker compose up -d --build   # jafet + books-db
+cd ~/Documents/Classmate && docker compose up -d --build  # the ClassMate stack
+```
+
+ClassMate's `chatbot` service joins `classmate-net` and reaches this one at
+`http://jafet:8802` — a container name on a private network, so neither side publishes the
+booking endpoint to a host interface. Order does not matter, because the network is created
+by hand rather than owned by either compose file; if you skip that command, both stacks
+fail with *network classmate-net declared as external, but could not be found*.
+
+A Jafet that is down is not an outage for ClassMate: `library.py` catches the connection
+error and tells the student to ask again, deliberately vague about whether the booking went
+through, since a read timeout aborts only ClassMate's side while Jafet finishes the turn.
 
 The ADK `api_server` still works if you want its full REST surface:
 
@@ -107,15 +152,23 @@ curl -X POST http://localhost:8801/run \
 
 `mcp_server.py` exposes one tool, `chat(session_id, message)`, over stdio — point any MCP
 client at it. Same `jafet/service.py` behind it as the HTTP server, so the two agree on what
-a turn is.
+a turn is. It is not a compose service, because stdio is the transport: an MCP client
+launches it as a child process. Run it on the host against the published Postgres, or, to
+use the image, `docker compose run --rm -T jafet python mcp_server.py`.
 
 ## Tests & evals
+
+Host-side, against a venv — they are fully mocked, so they need neither the containers nor
+a key:
 
 ```bash
 .venv/bin/pytest tests/          # scraper, booking, book-scraper, RAG, guardrail + HTTP tests (mocked)
 evals/eval_chatbot.ipynb          # seat conversation evals against the running API
 evals/eval_books.ipynb            # book RAG/SQL/routing evals (read-only, safe on any server)
 ```
+
+The notebooks do hit a running server, on `127.0.0.1:8802` and `127.0.0.1:5433` — both
+published by the compose file, so `docker compose up -d` is enough to run them.
 
 ## Notes
 
