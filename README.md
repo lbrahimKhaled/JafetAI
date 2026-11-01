@@ -97,10 +97,11 @@ For a single turn, pass the message as arguments:
 `python agent_client.py "what's free tomorrow at 2pm?"`.
 
 To use the server from another MCP host (Claude Desktop, MCP Inspector, …), point it at
-`python /path/to/server.py`. To browse it interactively:
+`python /path/to/server.py`. To list its tools from the command line (with the venv
+activated, since the CLI launches `fastmcp` from your PATH):
 
 ```bash
-.venv/bin/fastmcp dev server.py
+fastmcp list server.py
 ```
 
 ## Tests
