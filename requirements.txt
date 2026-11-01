@@ -1,13 +1,6 @@
-google-adk>=2.7
-litellm>=1.84
-mcp>=2.0
-fastapi
-uvicorn[standard]
+fastmcp>=4.1,<5
+openai-agents[litellm]>=0.24,<0.25
 requests
 python-dotenv
-psycopg[binary]
-openai
+pydantic>=2
 pytest
-ipykernel
-nbclient
-nbformat

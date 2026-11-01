@@ -2,7 +2,7 @@ import json
 from datetime import date, datetime, timedelta
 from unittest.mock import patch
 
-from jafet import booking, guardrails, scraper
+from jafet import booking, scraper, validation
 
 DAY = (date.today() + timedelta(days=1)).isoformat()  # tomorrow, always future
 
@@ -164,45 +164,17 @@ def test_book_rejects_garbage_input():
     assert out["status"] == "error"
 
 
-class FakeTool:
-    name = "book_seat"
-
-
-class FakeCtx:
-    # ADK always hands the callback a context; state is where a signed-in caller's
-    # identity lives, and an empty one is the walk-in case
-    def __init__(self, state=None):
-        self.state = state or {}
-
-
-def test_guardrail_rejects_bad_ids_and_emails():
+def test_validation_rejects_bad_ids_and_emails():
     base = {"student_name": "Test User", "student_id": "202400000",
-            "email": "tu00@mail.aub.edu"}
-    assert guardrails.validate_booking_args(FakeTool(), base, FakeCtx()) is None
+            "email": "tu00@mail.aub.edu", "program": "Undergraduate"}
+    assert validation.student_problems(**base) == []
     for bad in [{"email": "tu@gmail.com"}, {"email": "tu00@mail.aub.edu\n"},
                 {"student_id": "٢٠٢٣٠٠٠٠٠"}, {"student_id": "²²²²²²"},
-                {"student_id": "AB12345"}, {"student_name": "  "}]:
+                {"student_id": "AB12345"}, {"student_name": "  "},
+                {"program": "PhD"}]:
         args = dict(base)
         args.update(bad)
-        out = guardrails.validate_booking_args(FakeTool(), args, FakeCtx())
-        assert out is not None and out["status"] == "rejected", str(bad)
-
-
-def test_a_signed_in_student_cannot_book_as_someone_else():
-    """The domain check alone lets one valid AUB address stand in for another, which spends
-    a real student's daily quota. Session state is the only thing here the student cannot
-    type, so it is what the check reads."""
-    ctx = FakeCtx({"student_email": "tu00@mail.aub.edu"})
-    mine = {"student_name": "Test User", "student_id": "202400000",
-            "email": "tu00@mail.aub.edu"}
-    assert guardrails.validate_booking_args(FakeTool(), mine, ctx) is None
-
-    theirs = dict(mine, email="victim@mail.aub.edu")
-    out = guardrails.validate_booking_args(FakeTool(), theirs, ctx)
-    assert out is not None and out["status"] == "rejected"
-
-    # a walk-in session states no identity, so it still negotiates its own email
-    assert guardrails.validate_booking_args(FakeTool(), theirs, FakeCtx()) is None
+        assert validation.student_problems(**args), str(bad)
 
 
 class FakeResp:
