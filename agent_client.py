@@ -28,6 +28,10 @@ from agents.mcp import MCPServerStdio
 
 load_dotenv()
 
+import litellm  # noqa: E402  quiet its "Give Feedback" banner on every API error
+
+litellm.suppress_debug_info = True
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 SERVER = os.path.join(HERE, "server.py")
 
@@ -101,25 +105,34 @@ async def direct_command(server, line):
         print(f"  resource error: {e}")
 
 
-async def main(one_shot):
-    if not os.environ.get("OPENAI_API_KEY"):
-        set_tracing_disabled(True)  # traces upload to OpenAI; nothing to upload to
-
-    server = MCPServerStdio(
+def make_server(**env):
+    """The MCP client: launches server.py as a stdio child process."""
+    return MCPServerStdio(
         name="jafet",
         # the MCP SDK hands a stdio child only a minimal environment by default, which
         # would silently drop LIVE_BOOKING / JAFET_DB set in this shell
-        params={"command": sys.executable, "args": [SERVER], "env": dict(os.environ)},
+        params={"command": sys.executable, "args": [SERVER],
+                "env": {**os.environ, **env}},
         cache_tools_list=True,
         # one reserve_seat is up to three LibCal round trips at 20 s each
         client_session_timeout_seconds=90,
     )
-    async with server:
+
+
+async def make_agent(server, model=None):
+    """The agent, with today's date read from the server's jafet://today resource."""
+    if not os.environ.get("OPENAI_API_KEY"):
+        set_tracing_disabled(True)  # traces upload to OpenAI; nothing to upload to
+    today = await read_json(server, "jafet://today")
+    return Agent(name="JafetAI", instructions=INSTRUCTIONS.format(**today),
+                 mcp_servers=[server], model=model or MODEL)
+
+
+async def main(one_shot):
+    async with make_server() as server:
         tools = await server.list_tools()
         print("connected to MCP server 'jafet', tools:", ", ".join(t.name for t in tools))
-        today = await read_json(server, "jafet://today")
-        agent = Agent(name="JafetAI", instructions=INSTRUCTIONS.format(**today),
-                      mcp_servers=[server], model=MODEL)
+        agent = await make_agent(server)
         session = SQLiteSession("jafet-cli")  # in memory: carries the negotiation
 
         async def turn(message):

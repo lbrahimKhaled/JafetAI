@@ -65,7 +65,8 @@ cp .env.example .env    # then add a model key
 
 The agent's model is any OpenAI Agents SDK model name, set with `MODEL`. The default,
 `litellm/deepseek/deepseek-v4-flash`, goes through LiteLLM and needs only
-`DEEPSEEK_API_KEY`. To use OpenAI instead, set `MODEL` to an OpenAI model name and
+`DEEPSEEK_API_KEY`. The assignment requires the OpenAI Agents *SDK*, not OpenAI
+models: the SDK is model-agnostic. To use OpenAI instead, set `MODEL` to an OpenAI model name and
 `OPENAI_API_KEY`. With an OpenAI key, runs are also traced in the OpenAI dashboard;
 without one, tracing is switched off.
 
@@ -110,7 +111,7 @@ fastmcp list server.py
 .venv/bin/pytest -v
 ```
 
-47 tests. LibCal is mocked, so they need no network, no key, and book nothing.
+52 tests. LibCal is mocked, so they need no network, no key, and book nothing.
 
 - `tests/test_server.py`: each tool through a real MCP client (FastMCP in-memory):
   exactly three tools with descriptions and output schemas, find/book/reserve happy
@@ -118,8 +119,34 @@ fastmcp list server.py
 - `tests/test_agent_client.py`: the OpenAI Agents SDK client launching `server.py` over
   stdio. It lists the tools, reads `jafet://today`, gets a clear error back, and runs a
   full `Runner.run` round trip with a scripted model in place of the LLM.
+- `tests/test_scenarios.py`: the scenario evaluator below, its verdicts and its
+  plumbing.
 - `tests/test_scraper.py`: the LibCal grid parsing, slot planning and booking flow
   underneath.
+
+## Evaluating the agent
+
+The tests prove the tools work. `scenarios.py` checks the *agent*: given real requests,
+does it pick the right tool, refuse what it should, and book only when it should? It
+runs the real model against live LibCal, always as a dry run against a throwaway
+database (it forces `LIVE_BOOKING=0`).
+
+```bash
+.venv/bin/python scenarios.py --when "tomorrow" -v
+```
+
+| Scenario | Request | Passes when |
+|---|---|---|
+| `availability_question` | "What seats are free tomorrow from 2 to 4pm?" | calls `find_seats`, books nothing |
+| `one_shot_booking` | "Book me a seat … I'm Test User, ID …, email …, undergraduate." | calls `reserve_seat`, one booking recorded, reply says dry run |
+| `negotiated_booking` | Asks to book, gives the details in a second message | calls `reserve_seat` after the details arrive, one booking |
+| `bad_email` | Same booking with a `@gmail.com` address | nothing booked, reply mentions `mail.aub.edu` |
+| `too_long` | 9am to 5pm (8 hours) | nothing booked, reply mentions the 4-hour limit |
+| `too_far_ahead` | A date in 2099 | nothing booked |
+| `off_topic` | "What's the capital of France?" | no tool called |
+
+It prints a pass/fail table and exits non-zero if any scenario fails. Pick a `--when`
+on which the room is open, or the booking scenarios correctly come back unavailable.
 
 ## Deliverables
 
@@ -127,7 +154,8 @@ fastmcp list server.py
 - Reflection: [`docs/REFLECTION.md`](docs/REFLECTION.md)
 - Screencast plan: [`docs/SCREENCAST.md`](docs/SCREENCAST.md)
 - FastMCP server: [`server.py`](server.py); Agents SDK host/client:
-  [`agent_client.py`](agent_client.py)
+  [`agent_client.py`](agent_client.py); agent evaluation:
+  [`scenarios.py`](scenarios.py)
 
 ## Notes
 
